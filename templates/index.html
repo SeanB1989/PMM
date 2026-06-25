@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vantage — PMM Intelligence</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand:       #4F46E5;
+      --brand-mid:   #6366F1;
+      --brand-light: #818CF8;
+      --brand-pale:  #EEF2FF;
+      --accent:      #F59E0B;
+      --green:       #10B981;
+      --red:         #EF4444;
+      --bg:          #F8F9FF;
+      --surface:     #FFFFFF;
+      --border:      #E2E5F5;
+      --text:        #1E1B4B;
+      --muted:       #6B7280;
+      --radius:      12px;
+      --shadow:      0 1px 3px rgba(79,70,229,.08), 0 4px 16px rgba(79,70,229,.06);
+      --shadow-lg:   0 8px 32px rgba(79,70,229,.12);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top bar ─────────────────────────────── */
+    .topbar {
+      height: 58px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .logo-mark {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      box-shadow: 0 2px 8px rgba(79,70,229,.35);
+      flex-shrink: 0;
+    }
+    .logo-text { font-size: 17px; font-weight: 800; color: var(--brand); letter-spacing: -0.4px; }
+    .logo-tagline { font-size: 12px; color: var(--muted); margin-left: 2px; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+      box-shadow: 0 0 0 3px rgba(16,185,129,.2);
+    }
+    .status-label { font-size: 12px; color: var(--muted); }
+
+    /* ── Layout ──────────────────────────────── */
+    .layout {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      height: calc(100vh - 58px);
+    }
+
+    /* ── Sidebar ─────────────────────────────── */
+    .sidebar {
+      width: 320px;
+      min-width: 320px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 20px 22px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-header h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--brand);
+    }
+
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.1px;
+    }
+    .field small { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+    input[type="text"], textarea, select {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      padding: 9px 12px;
+      font-size: 13.5px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+    }
+    input[type="text"]:focus, textarea:focus {
+      border-color: var(--brand-mid);
+      box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+      background: #fff;
+    }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+    /* ── Competitors ─────────────────────────── */
+    .comp-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .comp-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      overflow: hidden;
+    }
+    .comp-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .comp-num {
+      width: 20px; height: 20px;
+      background: var(--brand-pale);
+      color: var(--brand);
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .comp-card-header span { font-size: 11px; font-weight: 600; color: var(--muted); flex: 1; }
+    .comp-remove {
+      background: none; border: none;
+      color: var(--muted); cursor: pointer; font-size: 15px;
+      padding: 2px 4px; border-radius: 4px; line-height: 1;
+    }
+    .comp-remove:hover { color: var(--red); background: rgba(239,68,68,.08); }
+    .comp-card-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 7px; }
+    .comp-card-body input { font-size: 13px; padding: 8px 10px; }
+
+    .btn-add-comp {
+      background: none;
+      border: 1.5px dashed var(--border);
+      border-radius: 9px;
+      color: var(--brand-mid);
+      padding: 9px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 600;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .btn-add-comp:hover {
+      border-color: var(--brand);
+      background: var(--brand-pale);
+    }
+
+    /* ── Run button ──────────────────────────── */
+    .sidebar-footer {
+      padding: 16px 22px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-run {
+      width: 100%;
+      background: linear-gradient(135deg, var(--brand) 0%, #6D28D9 100%);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      padding: 13px 20px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(79,70,229,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-run:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,.45); }
+    .btn-run:active { transform: translateY(0); }
+    .btn-run:disabled {
+      opacity: 0.65; cursor: not-allowed;
+      transform: none; box-shadow: 0 2px 8px rgba(79,70,229,.2);
+    }
+
+    /* ── Main content ────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg);
+    }
+
+    /* ── Tab bar ─────────────────────────────── */
+    .tabbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 24px;
+      overflow-x: auto;
+      gap: 2px;
+    }
+    .tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 15px 16px 13px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+      position: relative;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--brand); border-bottom-color: var(--brand); }
+    .tab-icon { font-size: 14px; }
+    .pill {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1px 7px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .tab.active .pill,
+    .tab.done .pill {
+      background: var(--brand-pale);
+      border-color: var(--brand-light);
+      color: var(--brand);
+    }
+
+    /* ── Content area ────────────────────────── */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+    }
+
+    /* ── Home / empty state ──────────────────── */
+    .home-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      text-align: center;
+      gap: 18px;
+    }
+    .home-graphic {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, var(--brand-pale), #E0E7FF);
+      border-radius: 24px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      box-shadow: var(--shadow);
+    }
+    .home-state h2 { font-size: 22px; font-weight: 800; color: var(--text); }
+    .home-state p { font-size: 14px; color: var(--muted); max-width: 400px; line-height: 1.7; }
+
+    .how-it-works {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 640px;
+      margin-top: 8px;
+    }
+    .step-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: left;
+      box-shadow: var(--shadow);
+    }
+    .step-icon { font-size: 22px; margin-bottom: 8px; }
+    .step-card h4 { font-size: 12px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .step-card p { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+    /* ── Progress / Live feed ────────────────── */
+    .progress-view { display: flex; flex-direction: column; gap: 20px; }
+
+    .phase-block {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to right, var(--brand-pale), transparent);
+    }
+    .phase-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    .phase-done-icon { font-size: 16px; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .phase-title { font-size: 13px; font-weight: 700; color: var(--text); }
+    .phase-body { padding: 10px 18px 14px; display: flex; flex-direction: column; gap: 4px; }
+    .log-entry {
+      font-size: 12.5px;
+      color: var(--muted);
+      padding: 2px 0;
+      font-family: "SF Mono", "Fira Code", ui-monospace, monospace;
+      line-height: 1.5;
+    }
+    .log-entry.highlight { color: var(--brand); font-weight: 600; }
+    .log-entry.err { color: var(--red); }
+
+    /* ── Result panels ───────────────────────── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .result-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to right, var(--brand-pale), transparent);
+    }
+    .result-card-header h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .result-card-body { padding: 22px; }
+
+    .analysis-text {
+      font-size: 14px;
+      line-height: 1.85;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px; height: 14px;
+      background: var(--brand);
+      margin-left: 1px;
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Messaging — special layout ─────────── */
+    .messaging-intro {
+      background: linear-gradient(135deg, var(--brand) 0%, #6D28D9 100%);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 22px;
+      color: #fff;
+      box-shadow: var(--shadow-lg);
+    }
+    .messaging-intro h3 { font-size: 13px; font-weight: 700; opacity: 0.8; margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .messaging-intro .primary-pos {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    /* ── Bottom export bar ───────────────────── */
+    .export-bar {
+      display: none;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 12px 32px;
+      gap: 10px;
+      align-items: center;
+    }
+    .export-bar.visible { display: flex; }
+    .export-label { font-size: 12px; color: var(--muted); margin-right: 4px; }
+    .btn-export {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 16px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .btn-export:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-pale); }
+
+    /* ── Scrollbar ───────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ── Responsive ──────────────────────────── */
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; min-width: unset; }
+      .layout { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Top bar ──────────────────────────────────── -->
+<header class="topbar">
+  <div class="logo-mark">🎯</div>
+  <span class="logo-text">Vantage</span>
+  <span class="logo-tagline">PMM Intelligence</span>
+  <div class="topbar-right">
+    <span class="status-dot"></span>
+    <span class="status-label" id="status-label">Ready</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>New Analysis</h2>
+    </div>
+
+    <div class="sidebar-body">
+
+      <div class="field">
+        <label>Your Product</label>
+        <input type="text" id="product_name" placeholder="e.g. Acme Revenue Intelligence" />
+      </div>
+
+      <div class="field">
+        <label>What It Does</label>
+        <textarea id="product_description" placeholder="Brief description — capabilities, key differentiators, use cases…"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Target Market</label>
+        <input type="text" id="target_market" placeholder="e.g. Enterprise B2B sales teams" />
+      </div>
+
+      <div class="field">
+        <label>Competitors</label>
+        <small>Add 2–4 direct competitors for the richest analysis</small>
+        <div class="comp-list" id="comp_list"></div>
+        <button class="btn-add-comp" onclick="addCompetitor()">+ Add competitor</button>
+      </div>
+
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-run" id="btn_run" onclick="startAnalysis()">
+        <span id="btn-icon">🚀</span>
+        <span id="btn-label">Run Analysis</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Tab bar -->
+    <nav class="tabbar">
+      <div class="tab active" data-tab="home" onclick="switchTab('home')">
+        <span class="tab-icon">🏠</span> Home
+      </div>
+      <div class="tab" data-tab="progress" onclick="switchTab('progress')">
+        <span class="tab-icon">📡</span> Live Feed
+        <span class="pill" id="pill-progress">–</span>
+      </div>
+      <div class="tab" data-tab="competitive" onclick="switchTab('competitive')">
+        <span class="tab-icon">🏁</span> Competitive
+        <span class="pill" id="pill-competitive">–</span>
+      </div>
+      <div class="tab" data-tab="reviews" onclick="switchTab('reviews')">
+        <span class="tab-icon">⭐</span> Reviews
+        <span class="pill" id="pill-reviews">–</span>
+      </div>
+      <div class="tab" data-tab="market" onclick="switchTab('market')">
+        <span class="tab-icon">📈</span> Market
+        <span class="pill" id="pill-market">–</span>
+      </div>
+      <div class="tab" data-tab="gaps" onclick="switchTab('gaps')">
+        <span class="tab-icon">🔍</span> Gaps
+        <span class="pill" id="pill-gaps">–</span>
+      </div>
+      <div class="tab" data-tab="messaging" onclick="switchTab('messaging')">
+        <span class="tab-icon">✍️</span> Messaging
+        <span class="pill" id="pill-messaging">–</span>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="content-area">
+
+      <!-- Home panel -->
+      <div class="panel active" id="panel-home">
+        <div class="home-state">
+          <div class="home-graphic">🎯</div>
+          <h2>Market intelligence, automated.</h2>
+          <p>Vantage scrapes competitor sites, mines real customer reviews across Reddit, G2, Capterra and more, then uses Claude to identify gaps and generate messaging grounded in actual market evidence.</p>
+          <div class="how-it-works">
+            <div class="step-card">
+              <div class="step-icon">🕸️</div>
+              <h4>Scrape & Research</h4>
+              <p>Competitor sites, pricing pages, G2, Capterra, Reddit threads, Product Hunt</p>
+            </div>
+            <div class="step-card">
+              <div class="step-icon">🧠</div>
+              <h4>Analyze with AI</h4>
+              <p>Claude cross-references all sources to surface patterns, gaps, and opportunities</p>
+            </div>
+            <div class="step-card">
+              <div class="step-icon">✍️</div>
+              <h4>Generate Messaging</h4>
+              <p>Differentiated positioning angles backed by real intelligence, not guesswork</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live feed panel -->
+      <div class="panel" id="panel-progress">
+        <div class="progress-view" id="progress-view"></div>
+      </div>
+
+      <!-- Competitive panel -->
+      <div class="panel" id="panel-competitive">
+        <div class="result-card">
+          <div class="result-card-header">
+            <span>🏁</span>
+            <h3>Competitive Landscape Analysis</h3>
+          </div>
+          <div class="result-card-body">
+            <div class="analysis-text" id="text-competitive"><span style="color:var(--muted);font-size:13px;">Analysis will appear here once complete.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews panel -->
+      <div class="panel" id="panel-reviews">
+        <div class="result-card">
+          <div class="result-card-header">
+            <span>⭐</span>
+            <h3>Customer Review Intelligence</h3>
+          </div>
+          <div class="result-card-body">
+            <div class="analysis-text" id="text-reviews"><span style="color:var(--muted);font-size:13px;">Analysis will appear here once complete.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Market panel -->
+      <div class="panel" id="panel-market">
+        <div class="result-card">
+          <div class="result-card-header">
+            <span>📈</span>
+            <h3>Market Intelligence</h3>
+          </div>
+          <div class="result-card-body">
+            <div class="analysis-text" id="text-market"><span style="color:var(--muted);font-size:13px;">Analysis will appear here once complete.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gaps panel -->
+      <div class="panel" id="panel-gaps">
+        <div class="result-card">
+          <div class="result-card-header">
+            <span>🔍</span>
+            <h3>Gaps &amp; Opportunities</h3>
+          </div>
+          <div class="result-card-body">
+            <div class="analysis-text" id="text-gaps"><span style="color:var(--muted);font-size:13px;">Analysis will appear here once complete.</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messaging panel -->
+      <div class="panel" id="panel-messaging">
+        <div class="result-card">
+          <div class="result-card-header">
+            <span>✍️</span>
+            <h3>Messaging Recommendations</h3>
+          </div>
+          <div class="result-card-body">
+            <div class="analysis-text" id="text-messaging"><span style="color:var(--muted);font-size:13px;">Analysis will appear here once complete.</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+
+    <!-- Export bar -->
+    <div class="export-bar" id="export-bar">
+      <span class="export-label">Export:</span>
+      <button class="btn-export" onclick="exportMarkdown()">⬇ Markdown report</button>
+      <button class="btn-export" onclick="copyAll()">📋 Copy to clipboard</button>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+  // ── State ──────────────────────────────────────────────────
+  let buffers = { competitive:"", reviews:"", market:"", gaps:"", messaging:"" };
+  let currentStreamSection = null;
+  let eventSource = null;
+
+  // phase blocks in the live feed
+  let currentPhaseEl = null;
+  let currentPhaseBody = null;
+
+  // ── Init ───────────────────────────────────────────────────
+  document.addEventListener("DOMContentLoaded", () => {
+    addCompetitor(); addCompetitor();
+    checkApiConfig();
+  });
+
+  async function checkApiConfig() {
+    try {
+      const res = await fetch("/health");
+      const d = await res.json();
+      if (!d.api_key_configured) {
+        document.getElementById("status-label").textContent = "API key missing";
+        document.querySelector(".status-dot").style.background = "#F59E0B";
+      }
+    } catch(e) {}
+  }
+
+  // ── Tabs ───────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelector(`[data-tab="${name}"]`).classList.add("active");
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.getElementById(`panel-${name}`).classList.add("active");
+  }
+
+  function setPill(section, text, done=false) {
+    const el = document.getElementById(`pill-${section}`);
+    if (!el) return;
+    el.textContent = text;
+    if (done) el.parentElement.classList.add("done");
+  }
+
+  // ── Competitors ────────────────────────────────────────────
+  let compCount = 0;
+  function addCompetitor() {
+    compCount++;
+    const div = document.createElement("div");
+    div.className = "comp-card";
+    div.id = `comp_${compCount}`;
+    div.innerHTML = `
+      <div class="comp-card-header">
+        <div class="comp-num">${compCount}</div>
+        <span>Competitor ${compCount}</span>
+        <button class="comp-remove" onclick="removeComp('comp_${compCount}')">✕</button>
+      </div>
+      <div class="comp-card-body">
+        <input type="text" placeholder="Company name" class="comp-name" />
+        <input type="text" placeholder="Website URL  (e.g. https://example.com)" class="comp-url" />
+      </div>`;
+    document.getElementById("comp_list").appendChild(div);
+  }
+
+  function removeComp(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  }
+
+  function getCompetitors() {
+    const comps = [];
+    document.querySelectorAll(".comp-card").forEach(card => {
+      const name = card.querySelector(".comp-name").value.trim();
+      const url  = card.querySelector(".comp-url").value.trim();
+      if (name && url) comps.push({ name, url: url.startsWith("http") ? url : "https://" + url });
+    });
+    return comps;
+  }
+
+  // ── Live feed: phase blocks ────────────────────────────────
+  function startPhase(title) {
+    const view = document.getElementById("progress-view");
+    const block = document.createElement("div");
+    block.className = "phase-block";
+    block.innerHTML = `
+      <div class="phase-header">
+        <div class="phase-spinner" id="spinner-${title.replace(/\s/g,'_')}"></div>
+        <span class="phase-title">${title}</span>
+      </div>
+      <div class="phase-body" id="phasebody-${title.replace(/\s/g,'_')}"></div>`;
+    view.appendChild(block);
+    currentPhaseEl = block;
+    currentPhaseBody = block.querySelector(".phase-body");
+    view.scrollTop = view.scrollHeight;
+  }
+
+  function finalizePhase() {
+    if (!currentPhaseEl) return;
+    const spinner = currentPhaseEl.querySelector(".phase-spinner");
+    if (spinner) {
+      spinner.outerHTML = `<span class="phase-done-icon">✅</span>`;
+    }
+  }
+
+  function addLog(text, cls="") {
+    const body = currentPhaseBody || document.getElementById("progress-view");
+    const line = document.createElement("div");
+    line.className = `log-entry ${cls}`;
+    line.textContent = text;
+    body.appendChild(line);
+    if (currentPhaseEl) currentPhaseEl.scrollIntoView({behavior:"smooth", block:"end"});
+  }
+
+  // ── Streaming text ─────────────────────────────────────────
+  function appendSection(section, chunk) {
+    buffers[section] += chunk;
+    const el = document.getElementById(`text-${section}`);
+    if (!el) return;
+
+    if (currentStreamSection !== section) {
+      const prev = document.getElementById("stream-cursor");
+      if (prev) prev.remove();
+      currentStreamSection = section;
+    }
+
+    el.textContent = buffers[section];
+    let cursor = document.getElementById("stream-cursor");
+    if (!cursor) {
+      cursor = document.createElement("span");
+      cursor.id = "stream-cursor";
+      cursor.className = "cursor";
+    }
+    el.appendChild(cursor);
+  }
+
+  function finalizeSection(section) {
+    const cursor = document.getElementById("stream-cursor");
+    if (cursor) cursor.remove();
+    setPill(section, "✓", true);
+  }
+
+  // ── Run analysis ───────────────────────────────────────────
+  async function startAnalysis() {
+    const productName  = document.getElementById("product_name").value.trim();
+    const productDesc  = document.getElementById("product_description").value.trim();
+    const targetMarket = document.getElementById("target_market").value.trim();
+    const competitors  = getCompetitors();
+
+    if (!productName)        { alert("Please enter your product name."); return; }
+    if (competitors.length < 1) { alert("Please add at least one competitor."); return; }
+
+    // Reset
+    buffers = { competitive:"", reviews:"", market:"", gaps:"", messaging:"" };
+    currentStreamSection = null;
+    currentPhaseEl = null; currentPhaseBody = null;
+
+    document.getElementById("progress-view").innerHTML = "";
+    ["competitive","reviews","market","gaps","messaging"].forEach(s => {
+      document.getElementById(`text-${s}`).innerHTML =
+        `<span style="color:var(--muted);font-size:13px;">Analyzing…</span>`;
+      setPill(s, "–");
+      document.querySelector(`[data-tab="${s}"]`).classList.remove("done");
+    });
+    document.getElementById("export-bar").classList.remove("visible");
+
+    const btn = document.getElementById("btn_run");
+    btn.disabled = true;
+    document.getElementById("btn-icon").textContent = "⏳";
+    document.getElementById("btn-label").textContent = "Running…";
+    document.getElementById("status-label").textContent = "Analyzing…";
+
+    if (eventSource) { eventSource.close(); eventSource = null; }
+
+    switchTab("progress");
+    setPill("progress", "▶");
+
+    let res;
+    try {
+      res = await fetch("/analyze", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ product_name: productName, product_description: productDesc, target_market: targetMarket, competitors }),
+      });
+    } catch(e) {
+      startPhase("Error");
+      addLog("Network error: " + e.message, "err");
+      resetBtn(); return;
+    }
+
+    const json = await res.json();
+    if (!res.ok || json.error) {
+      startPhase("Error");
+      addLog(json.error || "Unknown error", "err");
+      resetBtn(); return;
+    }
+
+    const jobId = json.job_id;
+    eventSource = new EventSource(`/stream/${jobId}`);
+
+    eventSource.onmessage = function(e) {
+      const msg = JSON.parse(e.data);
+
+      if (msg.type === "phase") {
+        if (currentPhaseEl) finalizePhase();
+        startPhase(msg.data);
+        setPill("progress", "▶");
+
+      } else if (msg.type === "progress") {
+        addLog(msg.data);
+
+      } else if (msg.type === "stage") {
+        addLog("▶ " + msg.data, "highlight");
+
+      } else if (msg.type === "chunk") {
+        appendSection(msg.data.section, msg.data.text);
+
+      } else if (msg.type === "error") {
+        addLog("❌ " + msg.data, "err");
+        resetBtn();
+        eventSource.close();
+
+      } else if (msg.type === "complete") {
+        finalizePhase();
+        Object.keys(buffers).forEach(s => finalizeSection(s));
+        setPill("progress", "✓", true);
+        addLog("🎉 Analysis complete!", "highlight");
+        document.getElementById("export-bar").classList.add("visible");
+        document.getElementById("status-label").textContent = "Done";
+        resetBtn();
+        eventSource.close();
+        setTimeout(() => switchTab("messaging"), 700);
+      }
+    };
+
+    eventSource.onerror = function() {
+      addLog("Connection dropped — check server.", "err");
+      resetBtn();
+      eventSource.close();
+    };
+  }
+
+  function resetBtn() {
+    const btn = document.getElementById("btn_run");
+    btn.disabled = false;
+    document.getElementById("btn-icon").textContent = "🚀";
+    document.getElementById("btn-label").textContent = "Run Analysis";
+    document.getElementById("status-label").textContent = "Ready";
+  }
+
+  // ── Export ─────────────────────────────────────────────────
+  function buildReport() {
+    const sections = [
+      ["Competitive Landscape Analysis", "competitive"],
+      ["Customer Review Intelligence", "reviews"],
+      ["Market Intelligence", "market"],
+      ["Gaps & Opportunities", "gaps"],
+      ["Messaging Recommendations", "messaging"],
+    ];
+    let md = `# Vantage Intelligence Report\nGenerated ${new Date().toLocaleDateString("en-US", {dateStyle:"long"})}\n\n`;
+    sections.forEach(([title, key]) => {
+      md += `## ${title}\n\n${buffers[key] || "_No data_"}\n\n---\n\n`;
+    });
+    return md;
+  }
+
+  function exportMarkdown() {
+    const md   = buildReport();
+    const blob = new Blob([md], {type:"text/markdown"});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url;
+    a.download = `vantage-report-${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function copyAll() {
+    navigator.clipboard.writeText(buildReport()).then(() => {
+      const btns = document.querySelectorAll(".btn-export");
+      btns[1].textContent = "✅ Copied!";
+      setTimeout(() => btns[1].textContent = "📋 Copy to clipboard", 2000);
+    });
+  }
+</script>
+</body>
+</html>
